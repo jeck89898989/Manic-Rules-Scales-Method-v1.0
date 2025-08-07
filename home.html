@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manic Rules Scales Thesaurus - Home</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .home-container {
+            padding: 30px 20px;
+            max-width: 1100px; /* Wider for grid */
+            margin: 20px auto;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .home-container h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            font-size: 2.5em;
+        }
+
+        .home-intro {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+
+        .page-link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .page-link-card {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            background-color: var(--bg-color);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-link-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-link-card h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.5em;
+            color: var(--primary-color);
+        }
+
+        .page-link-card p {
+            margin: 0 0 15px 0; /* Space below description */
+            font-size: 0.95em;
+            color: var(--text-color);
+            line-height: 1.5;
+            flex-grow: 1; /* Allow description to take space */
+        }
+
+        .page-link-button {
+            display: inline-block;
+            padding: 10px 18px;
+            background-color: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            text-align: center;
+            margin-top: auto; /* Push button to bottom */
+        }
+
+        .page-link-button:hover {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="top-header">
+        <div class="top-header-content">
+            <div class="logo">MR</div>
+            <div class="header-nav">
+                <a href="home.html" class="header-link">Home</a>
+                <a href="scales.html" class="header-link">Scales</a>
+                <a href="chords.html" class="header-link">Chords</a>
+                <a href="intervals.html" class="header-link">Intervals</a>
+                <a href="lessons.html" class="header-link">Lessons</a>
+                 <!-- Courses dropdown -->
+                 <div class="header-nav-item">
+                     <a href="courses.html" class="header-link">Courses</a>
+                     <div class="dropdown-content">
+                         <a href="coursesquizzes.html">Quizzes</a>
+                         <a href="coursestests.html">Tests</a>
+                         <a href="coursesexams.html">Exams</a>
+                         <a href="coursesideas.html">Ideas</a>
+                     </div>
+                 </div>
+                <a href="ebooks.html" class="header-link">eBooks</a>
+                <a href="progress.html" class="header-link">Progress</a>
+                <a href="practice.html" class="header-link">Practice</a>
+                <a href="favorites.html" class="header-link">Favorites</a>
+                <a href="data.html" class="header-link">Data</a>
+                <a href="about.html" class="header-link">About</a>
+                <a href="settings.html" class="header-link">Settings</a>
+            </div>
+            <div class="sidebar-toggle-container">
+                 <!-- Keep sidebar toggle pointing to the main app -->
+                <button id="sidebar-toggle" aria-expanded="false" onclick="window.location.href='index.html'">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="sr-only">Go to App</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="home-container">
+        <h1>Welcome to the Manic Rules Scales Thesaurus</h1>
+        <p class="home-intro">
+            Your central hub for exploring interactive music theory tools and resources. Navigate through different sections using the links below.
+        </p>
+
+        <div class="page-link-grid">
+            <!-- Link to Main App -->
+            <div class="page-link-card">
+                <h2>Interactive Fretboard</h2>
+                <p>The core application. Visualize scales, chords, and intervals on a customizable fretboard. Play patterns, explore theory, and export diagrams.</p>
+                <a href="index.html" class="page-link-button">Go to App</a>
+            </div>
+
+            <!-- Link to Scales -->
+            <div class="page-link-card">
+                <h2>Scales Explorer</h2>
+                <p>Browse and filter through an extensive library of musical scales. View formulas, example spellings, and link directly to the interactive diagram.</p>
+                <a href="scales.html" class="page-link-button">Explore Scales</a>
+            </div>
+
+            <!-- Link to Chords -->
+            <div class="page-link-card">
+                <h2>Chords Explorer</h2>
+                <p>Discover various chord types, from basic triads to complex extended chords. Filter by intervals or related scales, and view diagrams.</p>
+                <a href="chords.html" class="page-link-button">Explore Chords</a>
+            </div>
+
+            <!-- Link to Intervals -->
+            <div class="page-link-card">
+                <h2>Intervals Explorer</h2>
+                <p>Learn about the building blocks of music. See all intervals, their semitone counts, and filter by chords or scales they belong to.</p>
+                <a href="intervals.html" class="page-link-button">Explore Intervals</a>
+            </div>
+
+            <!-- Link to Lessons -->
+            <div class="page-link-card">
+                <h2>Lessons</h2>
+                <p>Access structured lessons covering various music theory topics and techniques. (Content populated dynamically or added manually).</p>
+                <a href="lessons.html" class="page-link-button">View Lessons</a>
+            </div>
+
+             <!-- Link to Courses -->
+            <div class="page-link-card">
+                 <h2>Courses Overview</h2>
+                 <p>Browse available structured courses on music theory, instrument techniques, and more. (Course content coming soon).</p>
+                 <a href="courses.html" class="page-link-button">View Courses</a>
+            </div>
+
+            <!-- Link to Courses Sub-pages -->
+            <div class="page-link-card">
+                <h2>Quizzes / Tests / Exams</h2>
+                <p>Test your knowledge with quizzes, section tests, and comprehensive exams related to the courses. (Content coming soon).</p>
+                <!-- Multiple links can be added here or link to the main courses page -->
+                <a href="coursesquizzes.html" class="page-link-button" style="margin-bottom: 5px;">Quizzes</a>
+                <a href="coursestests.html" class="page-link-button" style="margin-bottom: 5px;">Tests</a>
+                <a href="coursesexams.html" class="page-link-button">Exams</a>
+            </div>
+             <div class="page-link-card">
+                 <h2>Course Ideas</h2>
+                 <p>Suggest or brainstorm ideas for future course content and topics.</p>
+                 <a href="coursesideas.html" class="page-link-button">Suggest Ideas</a>
+             </div>
+
+            <!-- Link to eBooks -->
+            <div class="page-link-card">
+                <h2>eBooks Library</h2>
+                <p>Access supplementary digital books covering scales, chords, harmony, and application in more depth. (eBooks coming soon).</p>
+                <a href="ebooks.html" class="page-link-button">Browse eBooks</a>
+            </div>
+
+            <!-- Link to Progress -->
+            <div class="page-link-card">
+                <h2>Your Progress</h2>
+                <p>Track your learning journey, completed lessons, quiz scores, and achievements. (Feature under development).</p>
+                <a href="progress.html" class="page-link-button">Check Progress</a>
+            </div>
+
+            <!-- Link to Practice -->
+            <div class="page-link-card">
+                <h2>Practice Room</h2>
+                <p>Find targeted exercises, drills, and practice routines to apply your knowledge. (Feature under development).</p>
+                <a href="practice.html" class="page-link-button">Go to Practice</a>
+            </div>
+
+            <!-- Link to Favorites -->
+            <div class="page-link-card">
+                <h2>Favorites</h2>
+                <p>Quickly access your saved favorite scales, chords, lessons, or other items. (Feature under development).</p>
+                <a href="favorites.html" class="page-link-button">View Favorites</a>
+            </div>
+
+            <!-- Link to Data -->
+            <div class="page-link-card">
+                <h2>Application Data</h2>
+                <p>View and manage the underlying data for intervals, chords, and scales used within the application. Export data tables.</p>
+                <a href="data.html" class="page-link-button">View Data</a>
+            </div>
+
+            <!-- Link to About -->
+            <div class="page-link-card">
+                <h2>About</h2>
+                <p>Learn more about the Manic Rules Scales Thesaurus project, its vision, features, and the team behind it.</p>
+                <a href="about.html" class="page-link-button">Read About</a>
+            </div>
+
+            <!-- Link to Settings -->
+            <div class="page-link-card">
+                <h2>Settings</h2>
+                <p>Customize application preferences like themes, audio settings, and defaults. (Feature under development).</p>
+                <a href="settings.html" class="page-link-button">Adjust Settings</a>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

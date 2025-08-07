@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manic Rules Scales Thesaurus - Data</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Add SheetJS library for XLSX export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* Reuse construction page styles */
+        .data-container {
+            /* text-align: center; */ /* Remove center alignment for table */
+            padding: 20px; /* Adjust padding */
+            max-width: 1000px; /* Increase max-width for table */
+            margin: 20px auto;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-heading {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            text-align: center; /* Keep heading centered */
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        /* Sub-heading for chord/scale tables */
+        .chord-table-heading, .scale-table-heading {
+            font-size: 1.5em; /* Make sub-headings smaller */
+            margin-top: 40px;
+            margin-bottom: 10px;
+            color: var(--secondary-color); /* Different color */
+            text-align: left; /* Align left */
+            border-bottom: 1px dashed var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .return-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .return-button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.95em;
+            margin-bottom: 30px; /* Space between tables */
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px 12px;
+            text-align: left;
+            vertical-align: top; /* Align content to the top */
+        }
+
+        .data-table thead {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--primary-color);
+        }
+
+        .data-table th {
+            font-weight: 600;
+        }
+
+        /* Add styles for sortable headers */
+        .data-table th.sortable {
+            cursor: pointer;
+            position: relative;
+            padding-right: 20px; /* Make space for arrow */
+        }
+        .data-table th.sortable::after {
+            content: '';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            border: 4px solid transparent;
+            opacity: 0.3;
+        }
+        .data-table th.sortable.sort-asc::after {
+            border-bottom-color: var(--text-color);
+            transform: translateY(-6px); /* Adjust vertical position */
+            opacity: 1;
+        }
+        .data-table th.sortable.sort-desc::after {
+            border-top-color: var(--text-color);
+            transform: translateY(-2px); /* Adjust vertical position */
+            opacity: 1;
+        }
+        .data-table th.sortable:hover::after {
+            opacity: 0.7;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        .data-table tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.04);
+        }
+
+        .color-swatch {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            vertical-align: middle;
+            margin-right: 8px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        /* Editable cell styles */
+        .data-table td[contenteditable="true"] {
+            background-color: rgba(255, 255, 0, 0.1); /* Light yellow hint */
+            cursor: text;
+            transition: background-color 0.3s ease;
+        }
+        .data-table td[contenteditable="true"]:focus {
+            background-color: rgba(255, 255, 0, 0.2);
+            outline: 1px solid var(--primary-color);
+        }
+        .data-table td.saved {
+            background-color: rgba(0, 255, 0, 0.15); /* Light green feedback */
+        }
+        .data-table td.error {
+            background-color: rgba(255, 0, 0, 0.15); /* Light red feedback */
+        }
+        .color-input-wrapper {
+             display: flex;
+             align-items: center;
+             gap: 5px;
+        }
+        .color-input-wrapper input[type="color"] {
+            padding: 0;
+            width: 25px;
+            height: 25px;
+            border: none;
+            cursor: pointer;
+        }
+        .color-input-wrapper span {
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        /* Export Button Style */
+        .export-button {
+            padding: 8px 15px;
+            background-color: var(--accent-color);
+            color: var(--button-text);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-bottom: 10px; /* Space below button */
+            display: inline-block; /* Align nicely */
+            margin-right: 10px; /* Space between buttons */
+        }
+        .export-button:hover {
+            background-color: var(--secondary-color);
+            opacity: 0.9;
+        }
+
+        /* Helper text */
+        .edit-info {
+            text-align: center;
+            font-style: italic;
+            color: var(--secondary-color);
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+        /* Style for ID2 column */
+        .data-table th:first-child,
+        .data-table td:first-child {
+            width: 50px; /* Adjust width as needed */
+            text-align: right;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        /* Style for Tones column */
+        .data-table th:nth-child(4), /* Target the 4th header (Tones) */
+        .data-table td:nth-child(4) { /* Target the 4th cell (Tones) */
+            width: 60px; /* Specific width for Tones column */
+            text-align: center; /* Center align the tone count */
+        }
+        /* Adjust example cell index due to new column */
+        .data-table td:nth-child(6) { /* Example cell is now 6th */
+             font-family: monospace;
+        }
+        .export-buttons-container {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-header">
+        <div class="top-header-content">
+            <div class="logo">MR</div>
+            <div class="header-nav">
+                <a href="home.html" class="header-link">Home</a>
+                <a href="scales.html" class="header-link">Scales</a>
+                <a href="chords.html" class="header-link">Chords</a>
+                <a href="intervals.html" class="header-link">Intervals</a>
+                <a href="lessons.html" class="header-link">Lessons</a>
+                <!-- Courses dropdown -->
+                <div class="header-nav-item">
+                     <a href="courses.html" class="header-link">Courses</a>
+                     <div class="dropdown-content">
+                         <a href="coursesquizzes.html">Quizzes</a>
+                         <a href="coursestests.html">Tests</a>
+                         <a href="coursesexams.html">Exams</a>
+                         <a href="coursesideas.html">Ideas</a>
+                     </div>
+                </div>
+                <a href="ebooks.html" class="header-link">eBooks</a>
+                <a href="progress.html" class="header-link">Progress</a>
+                <a href="practice.html" class="header-link">Practice</a>
+                <a href="favorites.html" class="header-link">Favorites</a>
+                <a href="data.html" class="header-link">Data</a>
+                <a href="about.html" class="header-link">About</a>
+                <a href="settings.html" class="header-link">Settings</a>
+            </div>
+            <div class="sidebar-toggle-container">
+                <button id="sidebar-toggle" aria-expanded="false" onclick="window.location.href='index.html'">
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="hamburger-line"></span>
+                    <span class="sr-only">Go to App</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="data-container">
+        <h1 class="data-heading">Interval Data</h1>
+        <p>This table lists all the musical intervals defined in the application, along with their properties. Editable fields have a light yellow background. Changes are saved automatically when you click away.</p>
+        <div class="export-buttons-container">
+            <button id="export-intervals-xlsx" class="export-button">Export Intervals to XLSX</button>
+        </div>
+        <table class="data-table" id="interval-table">
+            <thead>
+                <tr>
+                    <th>#</th> <!-- New header for sequential ID -->
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Short Name</th>
+                    <th>Semitones</th>
+                    <th>Color</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Table rows will be populated by JavaScript -->
+            </tbody>
+        </table>
+
+        <h1 class="data-heading" style="margin-top: 40px;">Chord Data</h1>
+        <p>This section lists all defined chords, grouped by the number of notes (tones). You can edit the Name and Intervals (comma-separated). Example spelling is based on the C root.</p>
+        <div class="export-buttons-container">
+             <button id="export-all-chords-xlsx" class="export-button">Export All Chords to XLSX (Multiple Sheets)</button>
+        </div>
+        <!-- Container for Chord Tables -->
+        <div id="chord-tables-container">
+            <!-- Chord tables will be generated here by JavaScript -->
+        </div>
+
+
+        <h1 class="data-heading" style="margin-top: 40px;">Scale Data</h1>
+        <p>This section lists all defined scales, grouped by the number of notes (tones). You can edit the Name and Intervals (comma-separated). Example spelling is based on the C root.</p>
+         <div class="export-buttons-container">
+            <button id="export-all-scales-xlsx" class="export-button">Export All Scales to XLSX (Multiple Sheets)</button>
+        </div>
+         <!-- Container for Scale Tables -->
+         <div id="scale-tables-container">
+             <!-- Scale tables will be generated here by JavaScript -->
+         </div>
+
+
+        <p class="edit-info">Note: Changes saved here are stored in your browser's local storage and will persist until cleared.</p>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="index.html" class="return-button">Go to Interactive Fretboard</a>
+        </div>
+    </div>
+
+    <!-- Load music theory data -->
+    <script src="music-theory.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const musicTheory = new MusicTheory(); // Load default data
+
+            // --- Local Storage Handling ---
+            const LOCAL_STORAGE_KEY = 'manic_rules_custom_data';
+
+            function loadLocalData() {
+                const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (storedData) {
+                    try {
+                        const customData = JSON.parse(storedData);
+                        // Merge custom data with default data
+                        if (customData.intervals) {
+                            Object.keys(customData.intervals).forEach(id => {
+                                if (musicTheory.intervals[id]) {
+                                    // Merge known fields carefully
+                                    if (customData.intervals[id].name !== undefined) musicTheory.intervals[id].name = customData.intervals[id].name;
+                                    if (customData.intervals[id].shortName !== undefined) musicTheory.intervals[id].shortName = customData.intervals[id].shortName;
+                                    // Semitones are fundamental, don't allow overriding from storage for now
+                                    // if (customData.intervals[id].semitones !== undefined) musicTheory.intervals[id].semitones = customData.intervals[id].semitones;
+                                    if (customData.intervals[id].color !== undefined) musicTheory.intervals[id].color = customData.intervals[id].color;
+                                } else {
+                                    // Add new interval only if essential fields are present
+                                    if(customData.intervals[id].name && customData.intervals[id].shortName && customData.intervals[id].semitones !== undefined) {
+                                         musicTheory.intervals[id] = customData.intervals[id];
+                                         // Assign a default color if missing
+                                         if (!musicTheory.intervals[id].color) musicTheory.intervals[id].color = '#CCCCCC';
+                                     }
+                                }
+                            });
+                        }
+                         if (customData.chords) {
+                             Object.keys(customData.chords).forEach(id => {
+                                 if (musicTheory.chords[id]) {
+                                      if (customData.chords[id].name !== undefined) musicTheory.chords[id].name = customData.chords[id].name;
+                                      if (customData.chords[id].intervals !== undefined && Array.isArray(customData.chords[id].intervals)) {
+                                           musicTheory.chords[id].intervals = customData.chords[id].intervals;
+                                      }
+                                 } else {
+                                      if(customData.chords[id].name && customData.chords[id].intervals && Array.isArray(customData.chords[id].intervals)) {
+                                          musicTheory.chords[id] = customData.chords[id];
+                                      }
+                                 }
+                             });
+                         }
+                         if (customData.scales) {
+                              Object.keys(customData.scales).forEach(id => {
+                                  if (musicTheory.scales[id]) {
+                                       if (customData.scales[id].name !== undefined) musicTheory.scales[id].name = customData.scales[id].name;
+                                       if (customData.scales[id].intervals !== undefined && Array.isArray(customData.scales[id].intervals)) {
+                                            musicTheory.scales[id].intervals = customData.scales[id].intervals;
+                                       }
+                                  } else {
+                                      if(customData.scales[id].name && customData.scales[id].intervals && Array.isArray(customData.scales[id].intervals)) {
+                                          musicTheory.scales[id] = customData.scales[id];
+                                      }
+                                  }
+                              });
+                         }
+                        console.log('Custom data loaded from localStorage.');
+                    } catch (e) {
+                        console.error('Error parsing custom data from localStorage:', e);
+                        localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear corrupted data
+                    }
+                }
+            }
+
+            function saveChange(type, id, field, value) {
+                 const storedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                 let customData = {};
+                 if (storedData) {
+                     try {
+                         customData = JSON.parse(storedData);
+                     } catch (e) {
+                         console.error('Error parsing existing custom data, overwriting.');
+                     }
+                 }
+
+                 // Ensure nested structure exists
+                 if (!customData[type]) customData[type] = {};
+                 if (!customData[type][id]) customData[type][id] = {};
+
+                 // Get the original default value to compare against
+                 // This requires having a non-mutated default copy or reloading defaults
+                 // For simplicity now, we just save the change. If needed, implement comparison logic.
+
+                 // Update the specific field
+                 customData[type][id][field] = value;
+
+                 // Also update the in-memory musicTheory object
+                 if (musicTheory[type] && musicTheory[type][id]) {
+                      // Special handling for intervals array in chords/scales
+                      if ((type === 'chords' || type === 'scales') && field === 'intervals' && Array.isArray(value)) {
+                          musicTheory[type][id][field] = value;
+                          const numTones = value.length;
+                          // Recalculate and update the Tones cell in the correct table
+                          const tableId = `${type}-table-${numTones}`; // Target the specific table
+                          const table = document.getElementById(tableId);
+                          if (table) {
+                                // Find row by ID cell - more robust selector needed
+                                const rows = table.querySelectorAll('tbody tr');
+                                rows.forEach(row => {
+                                    const idCell = row.cells[1]; // ID is the 2nd cell
+                                    if (idCell && idCell.textContent === id) {
+                                        const tonesCell = row.cells[3]; // Tones is the 4th cell
+                                        if (tonesCell) {
+                                            tonesCell.textContent = numTones;
+                                        }
+                                        // Update example notes
+                                        const exampleCell = row.cells[5]; // Example is 6th cell
+                                        if (exampleCell) {
+                                            try {
+                                                const exampleNotes = type === 'chords'
+                                                    ? musicTheory.getChordNotes('C', id)
+                                                    : musicTheory.getScaleNotes('C', id);
+                                                exampleCell.textContent = exampleNotes.join(' - ');
+                                            } catch (e) {
+                                                console.error("Error updating example notes:", e);
+                                                exampleCell.textContent = "Error";
+                                            }
+                                        }
+                                    }
+                                });
+                          } else {
+                              // If the table doesn't exist (e.g., changing tones count), we need to regenerate the tables
+                              console.warn(`Table ${tableId} not found. Table regeneration needed for accurate display.`);
+                              // Ideally, you'd trigger a table regeneration here, but for simplicity:
+                              alert("Number of tones changed. Refresh the page to see the item in the correct table.");
+                          }
+
+                      } else {
+                         musicTheory[type][id][field] = value;
+                      }
+                 }
+
+
+                 // Save back to localStorage
+                 try {
+                     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(customData));
+                     console.log(`Saved change: ${type}[${id}].${field} = ${value}`);
+                     return true; // Indicate success
+                 } catch (e) {
+                     console.error('Error saving custom data to localStorage:', e);
+                     alert('Error saving changes. Local storage might be full or unavailable.');
+                     return false; // Indicate failure
+                 }
+            }
+
+             function showFeedback(element, success) {
+                element.classList.remove('saved', 'error'); // Clear previous feedback
+                element.classList.add(success ? 'saved' : 'error');
+                setTimeout(() => {
+                    element.classList.remove('saved', 'error');
+                }, 1500); // Remove feedback after 1.5 seconds
+            }
+
+            // --- Sorting Functionality ---
+            /**
+             * Makes a table sortable by clicking its headers.
+             * @param {HTMLTableElement} table The table element to make sortable.
+             */
+            function makeTableSortable(table) {
+                const thead = table.tHead;
+                if (!thead) return;
+                const headers = thead.querySelectorAll('th');
+
+                headers.forEach((header, index) => {
+                    // Check if header is meant to be sortable (add conditions if needed)
+                    header.classList.add('sortable');
+                    header.dataset.sortDir = 'none'; // Initial state
+
+                    header.addEventListener('click', () => {
+                         // Clear previous sort indicators from other headers in this table
+                         headers.forEach(h => {
+                             if (h !== header) {
+                                 h.classList.remove('sort-asc', 'sort-desc');
+                                 h.dataset.sortDir = 'none';
+                             }
+                         });
+
+                         // Determine new sort direction
+                         let currentDir = header.dataset.sortDir;
+                         let newDir = 'asc';
+                         if (currentDir === 'asc') {
+                             newDir = 'desc';
+                         }
+
+                         // Update header state
+                         header.dataset.sortDir = newDir;
+                         header.classList.remove('sort-asc', 'sort-desc');
+                         header.classList.add(newDir === 'asc' ? 'sort-asc' : 'sort-desc');
+
+                         // Determine data type (simple check for now)
+                         let dataType = 'string';
+                         const firstBodyCell = table.tBodies[0]?.rows[0]?.cells[index];
+                         if (firstBodyCell && !isNaN(parseFloat(firstBodyCell.textContent)) && isFinite(firstBodyCell.textContent)) {
+                              // More robust check: are ALL values numbers? For simplicity, just check first row.
+                              // Refinement: Could check header text for Semitones/Tones/# ID.
+                              if (header.textContent === '#' || header.textContent === 'Semitones' || header.textContent === 'Tones') {
+                                   dataType = 'number';
+                              }
+                         }
+                         // Handle color column specifically if needed
+                         if (header.textContent === 'Color') {
+                             dataType = 'color'; // Custom type for color sorting logic
+                         }
+
+
+                         sortTableByColumn(table, index, dataType, newDir);
+                    });
+                });
+            }
+
+            /**
+             * Sorts the table rows based on a specific column.
+             * @param {HTMLTableElement} table The table element.
+             * @param {number} columnIndex The index of the column to sort by.
+             * @param {string} dataType The type of data in the column ('string', 'number', 'color').
+             * @param {string} direction 'asc' or 'desc'.
+             */
+            function sortTableByColumn(table, columnIndex, dataType, direction) {
+                const tbody = table.tBodies[0];
+                if (!tbody) return;
+                const rows = Array.from(tbody.rows);
+
+                const sortMultiplier = direction === 'asc' ? 1 : -1;
+
+                rows.sort((rowA, rowB) => {
+                    let valA = rowA.cells[columnIndex].textContent.trim();
+                    let valB = rowB.cells[columnIndex].textContent.trim();
+
+                    // Special handling for Color column (get the hex value)
+                    if (dataType === 'color') {
+                        valA = rowA.cells[columnIndex].querySelector('input[type="color"]')?.value || valA;
+                        valB = rowB.cells[columnIndex].querySelector('input[type="color"]')?.value || valB;
+                    }
+
+                    switch (dataType) {
+                        case 'number':
+                            valA = parseFloat(valA) || 0; // Default to 0 if parsing fails
+                            valB = parseFloat(valB) || 0;
+                            return (valA - valB) * sortMultiplier;
+                        case 'string':
+                        case 'color': // Sort color hex strings alphabetically
+                        default:
+                            return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' }) * sortMultiplier;
+                    }
+                });
+
+                // Remove existing rows
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+
+                // Append sorted rows
+                tbody.append(...rows);
+            }
+
+            // --- Table Population ---
+            loadLocalData(); // Load custom data first
+
+            const intervalTableBody = document.getElementById('interval-table').querySelector('tbody');
+            const chordTablesContainer = document.getElementById('chord-tables-container');
+            const scaleTablesContainer = document.getElementById('scale-tables-container'); // Get the new container
+
+            // Populate Intervals Table
+            const intervals = musicTheory.intervals;
+            const sortedIntervals = Object.entries(intervals).sort(([, a], [, b]) => a.semitones - b.semitones);
+            sortedIntervals.forEach(([id, data], index) => {
+                const row = intervalTableBody.insertRow();
+
+                const cellSeqId = row.insertCell(); // New cell for sequential ID
+                cellSeqId.textContent = index + 1;
+
+                const cellId = row.insertCell();
+                cellId.textContent = id;
+
+                const cellName = row.insertCell();
+                cellName.textContent = data.name;
+                cellName.setAttribute('contenteditable', 'true');
+                addEditListener(cellName, 'intervals', id, 'name');
+
+                const cellShortName = row.insertCell();
+                cellShortName.textContent = data.shortName;
+                cellShortName.setAttribute('contenteditable', 'true');
+                addEditListener(cellShortName, 'intervals', id, 'shortName');
+
+                const cellSemitones = row.insertCell();
+                cellSemitones.textContent = data.semitones; // Semitones not editable
+
+                const cellColor = row.insertCell();
+                cellColor.classList.add('color-cell'); // Add class for potential styling
+
+                // Wrapper for color input and text
+                const colorWrapper = document.createElement('div');
+                colorWrapper.className = 'color-input-wrapper';
+
+                const colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.value = data.color;
+                addEditListener(colorInput, 'intervals', id, 'color', true); // Special listener for color input
+
+                const colorText = document.createElement('span');
+                colorText.textContent = data.color;
+
+                colorWrapper.appendChild(colorInput);
+                colorWrapper.appendChild(colorText);
+                cellColor.appendChild(colorWrapper);
+            });
+
+            // Make the intervals table sortable
+            makeTableSortable(document.getElementById('interval-table'));
+
+            // --- Populate Chords Tables (Split by Number of Tones) ---
+            const chords = musicTheory.chords;
+            const groupedChords = {};
+
+            // Group chords by the number of intervals (tones)
+            Object.entries(chords).forEach(([id, data]) => {
+                const numTones = data.intervals.length;
+                if (!groupedChords[numTones]) {
+                    groupedChords[numTones] = [];
+                }
+                groupedChords[numTones].push([id, data]);
+            });
+
+            // Sort groups by number of tones
+            const sortedChordToneGroups = Object.keys(groupedChords).sort((a, b) => a - b);
+
+            // Create a table for each group
+             chordTablesContainer.innerHTML = ''; // Clear previous content if any
+            sortedChordToneGroups.forEach(numTones => {
+                const group = groupedChords[numTones];
+                group.sort(([, a], [, b]) => a.name.localeCompare(b.name)); // Sort chords within group
+
+                // Create Heading
+                const heading = document.createElement('h3');
+                heading.className = 'chord-table-heading';
+                heading.textContent = `${numTones}-Tone Chords`;
+                chordTablesContainer.appendChild(heading);
+
+                // Create Table
+                const table = document.createElement('table');
+                table.className = 'data-table chord-table'; // Add specific class
+                table.id = `chord-table-${numTones}`; // Unique ID for the table
+                chordTablesContainer.appendChild(table);
+
+                // Create Table Header
+                const thead = table.createTHead();
+                const headerRow = thead.insertRow();
+                const headers = ['#', 'ID', 'Name', 'Tones', 'Intervals', 'Example (C Root)'];
+                headers.forEach(text => {
+                    const th = document.createElement('th');
+                    th.textContent = text;
+                    headerRow.appendChild(th);
+                });
+
+                // Create Table Body
+                const tbody = table.createTBody();
+                group.forEach(([id, data], index) => {
+                    const row = tbody.insertRow();
+
+                    const cellSeqId = row.insertCell();
+                    cellSeqId.textContent = index + 1;
+
+                    const cellId = row.insertCell();
+                    cellId.textContent = id;
+
+                    const cellName = row.insertCell();
+                    cellName.textContent = data.name;
+                    cellName.setAttribute('contenteditable', 'true');
+                    addEditListener(cellName, 'chords', id, 'name');
+
+                    const cellTones = row.insertCell();
+                    cellTones.textContent = data.intervals.length;
+                    cellTones.style.textAlign = 'center';
+
+                    const cellIntervals = row.insertCell();
+                    cellIntervals.textContent = data.intervals.join(',');
+                    cellIntervals.setAttribute('contenteditable', 'true');
+                    addEditListener(cellIntervals, 'chords', id, 'intervals');
+
+                    const cellExample = row.insertCell();
+                    const exampleNotes = musicTheory.getChordNotes('C', id);
+                    cellExample.textContent = exampleNotes.join(' - ');
+                });
+                 // Make the newly created chord table sortable
+                 makeTableSortable(table);
+            });
+
+
+            // --- Populate Scales Tables (Split by Number of Tones) ---
+             const scales = musicTheory.scales;
+             const groupedScales = {};
+
+             // Group scales by the number of intervals (tones)
+             Object.entries(scales).forEach(([id, data]) => {
+                 const numTones = data.intervals.length;
+                 if (!groupedScales[numTones]) {
+                     groupedScales[numTones] = [];
+                 }
+                 groupedScales[numTones].push([id, data]);
+             });
+
+             // Sort groups by number of tones
+             const sortedScaleToneGroups = Object.keys(groupedScales).sort((a, b) => a - b);
+
+             // Create a table for each scale group
+             scaleTablesContainer.innerHTML = ''; // Clear previous content
+             sortedScaleToneGroups.forEach(numTones => {
+                 const group = groupedScales[numTones];
+                 group.sort(([, a], [, b]) => a.name.localeCompare(b.name)); // Sort scales within group
+
+                 // Create Heading
+                 const heading = document.createElement('h3');
+                 heading.className = 'scale-table-heading'; // Use specific class
+                 heading.textContent = `${numTones}-Tone Scales`;
+                 scaleTablesContainer.appendChild(heading);
+
+                 // Create Table
+                 const table = document.createElement('table');
+                 table.className = 'data-table scale-table'; // Add specific class
+                 table.id = `scale-table-${numTones}`; // Unique ID for the table
+                 scaleTablesContainer.appendChild(table);
+
+                 // Create Table Header
+                 const thead = table.createTHead();
+                 const headerRow = thead.insertRow();
+                 const headers = ['#', 'ID', 'Name', 'Tones', 'Intervals', 'Example (C Root)'];
+                 headers.forEach(text => {
+                     const th = document.createElement('th');
+                     th.textContent = text;
+                     headerRow.appendChild(th);
+                 });
+
+                 // Create Table Body
+                 const tbody = table.createTBody();
+                 group.forEach(([id, data], index) => {
+                     const row = tbody.insertRow();
+
+                     const cellSeqId = row.insertCell();
+                     cellSeqId.textContent = index + 1;
+
+                     const cellId = row.insertCell();
+                     cellId.textContent = id;
+
+                     const cellName = row.insertCell();
+                     cellName.textContent = data.name;
+                     cellName.setAttribute('contenteditable', 'true');
+                     addEditListener(cellName, 'scales', id, 'name');
+
+                     const cellTones = row.insertCell();
+                     cellTones.textContent = data.intervals.length;
+                     cellTones.style.textAlign = 'center';
+
+                     const cellIntervals = row.insertCell();
+                     cellIntervals.textContent = data.intervals.join(','); // Join with comma for editing
+                     cellIntervals.setAttribute('contenteditable', 'true');
+                     addEditListener(cellIntervals, 'scales', id, 'intervals');
+
+                     const cellExample = row.insertCell();
+                     const exampleNotes = musicTheory.getScaleNotes('C', id);
+                     cellExample.textContent = exampleNotes.join(' - '); // Example not editable
+                 });
+                 // Make the newly created scale table sortable
+                 makeTableSortable(table);
+             });
+
+
+            // --- XLSX Export Functionality ---
+            function exportTableToXLSX(tableId) {
+                const table = document.getElementById(tableId);
+                if (!table) {
+                    console.error(`Table with ID "${tableId}" not found.`);
+                    return null; // Return null if table not found
+                }
+                const ws = XLSX.utils.table_to_sheet(table);
+                return ws; // Return the worksheet object
+            }
+
+            // Export All Chords to Multiple Sheets
+             document.getElementById('export-all-chords-xlsx').addEventListener('click', () => {
+                 const wb = XLSX.utils.book_new(); // Create a new workbook
+                 sortedChordToneGroups.forEach(numTones => {
+                     const tableId = `chord-table-${numTones}`;
+                     const ws = exportTableToXLSX(tableId); // Get worksheet data
+                     if (ws) {
+                          let sheetName = `${numTones} Tone Chords`;
+                          sheetName = sheetName.replace(/[:\\/?*[\]]/g, '').substring(0, 31);
+                          XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                     }
+                 });
+                 if (wb.SheetNames.length > 0) {
+                     XLSX.writeFile(wb, 'all_chords_data.xlsx');
+                 } else {
+                     alert("No chord tables found to export.");
+                 }
+             });
+
+             // Export All Scales to Multiple Sheets
+              document.getElementById('export-all-scales-xlsx').addEventListener('click', () => {
+                  const wb = XLSX.utils.book_new(); // Create a new workbook
+                  sortedScaleToneGroups.forEach(numTones => {
+                      const tableId = `scale-table-${numTones}`;
+                      const ws = exportTableToXLSX(tableId); // Get worksheet data
+                      if (ws) {
+                           let sheetName = `${numTones} Tone Scales`;
+                           sheetName = sheetName.replace(/[:\\/?*[\]]/g, '').substring(0, 31);
+                           XLSX.utils.book_append_sheet(wb, ws, sheetName);
+                      }
+                  });
+                  if (wb.SheetNames.length > 0) {
+                      XLSX.writeFile(wb, 'all_scales_data.xlsx');
+                  } else {
+                      alert("No scale tables found to export.");
+                  }
+              });
+
+            // Add event listeners for individual table export buttons
+            document.getElementById('export-intervals-xlsx').addEventListener('click', () => {
+                const ws = exportTableToXLSX('interval-table');
+                 if (ws) {
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, "Intervals");
+                    XLSX.writeFile(wb, 'intervals_data.xlsx');
+                }
+            });
+
+            // Helper function to check if an element contains a specific text node
+            function containsText(element, text) {
+                 if (!element || !element.childNodes) return false;
+                 for (let i = 0; i < element.childNodes.length; i++) {
+                     if (element.childNodes[i].nodeType === Node.TEXT_NODE && element.childNodes[i].nodeValue.trim() === text) {
+                         return true;
+                     }
+                 }
+                 return false;
+            }
+
+            // Override querySelector to handle specific text content matching
+            function querySelectorWithText(selector, text) {
+                const elements = document.querySelectorAll(selector);
+                for (let i = 0; i < elements.length; i++) {
+                    if (containsText(elements[i], text)) {
+                        return elements[i];
+                    }
+                }
+                return null; // Return null if no element matches
+            }
+
+            function addEditListener(element, type, id, field, isColorInput = false) {
+                if (isColorInput) {
+                    // For color input, save on 'change' event
+                    element.addEventListener('change', (e) => {
+                         const newValue = e.target.value;
+                         const success = saveChange(type, id, field, newValue);
+                         showFeedback(element.parentElement.parentElement, success); // Feedback on the <td>
+                    });
+                } else {
+                    // For contenteditable text fields, save on 'blur' (when focus is lost)
+                    element.addEventListener('blur', (e) => {
+                        let newValue = e.target.textContent.trim();
+                        let valueToSave = newValue;
+
+                        // Basic validation for Intervals array (comma-separated, no spaces)
+                        if ((type === 'chords' || type === 'scales') && field === 'intervals') {
+                            const intervalsArray = newValue.split(',').map(s => s.trim()).filter(s => s);
+                             // Validate each interval ID exists in the master list or is '1'
+                             if (intervalsArray.length === 0 || intervalsArray.some(int => !musicTheory.intervals[int] && int !== '1')) {
+                                 alert(`Invalid intervals format or unknown interval ID used for ${id}. Please use comma-separated valid interval IDs (e.g., 1,b3,5). Changes not saved.`);
+                                 // Attempt to revert to the last known good state from musicTheory object
+                                 e.target.textContent = musicTheory[type][id][field].join(',');
+                                 showFeedback(e.target, false);
+                                 return;
+                             }
+                             valueToSave = intervalsArray; // Save as array
+                        }
+
+                        const success = saveChange(type, id, field, valueToSave);
+                        showFeedback(e.target, success);
+                    });
+
+                    // Prevent adding newlines on Enter key press
+                    element.addEventListener('keydown', (e) => {
+                         if (e.key === 'Enter') {
+                             e.preventDefault(); // Prevent newline
+                             e.target.blur(); // Trigger blur to save
+                         }
+                     });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
